@@ -1,6 +1,7 @@
-const { exec, execSync } = require('child_process');
-const fs = require('fs');
-const path = require('path');
+import { exec, execSync } from 'child_process';
+import fs from 'fs';
+import path from 'path';
+import chalk from 'chalk';
 
 const folder_path_to_files_with_metdata =
   'K:\\Mobile photos and videos management\\realme-6\\Camera\\realme-6-videos\\';
@@ -10,7 +11,7 @@ const folder_path_to_files_needing_metadata =
 // ffmpeg -i original_file.mp4 -i handbrake_Wala_file.mp4 -map 1 -map_metadata 0 -c copy fixed.mp4
 
 // Function to run FFmpeg command for each file
-function runFFmpegCommand(filename) {
+function runFFmpegCommand(filename, count) {
   const abs_path_to_file_with_metadata = `"${
     folder_path_to_files_with_metdata + filename
   }"`;
@@ -41,9 +42,13 @@ function runFFmpegCommand(filename) {
   // console.log(command);
 
   try {
-    const stdout = execSync(command);
-    console.log(`FFmpeg command executed successfully for ${filename}`);
-    console.log(stdout.toString());
+    const stdout = execSync(command, { stdio: 'ignore' });
+    console.log(
+      chalk.green(
+        `FFmpeg command executed successfully for ${filename} ${count}/${mp4Files.length}`
+      )
+    );
+    // console.log(stdout.toString());
   } catch (error) {
     console.error(
       `Error running FFmpeg command for ${filename}: ${error.message}`
@@ -56,20 +61,6 @@ function runFFmpegCommand(filename) {
     // Rename the file
     fs.renameSync(abs_path_to_file_needing_metadata, newFilename);
   }
-
-  //   execSync(command, (error, stdout, stderr) => {
-  //     if (error) {
-  //       console.error(
-  //         `Error running FFmpeg command for ${filename}: ${error.message}`
-  //       );
-  //       return;
-  //     }
-  //     if (stderr) {
-  //       console.error(`FFmpeg command stderr for ${filename}: ${stderr}`);
-  //       return;
-  //     }
-  //     console.log(`FFmpeg command executed successfully for ${filename}`);
-  //   });
 }
 
 // ffmpeg -i in.mp4 -c:v libx264 -crf 23 -c:a aac -map_metadata 0 out.mp4
@@ -105,13 +96,13 @@ function runFFmpegCommand(filename) {
 } */
 
 // Get a list of all files that need the metadata
-console.log(fs.readdirSync(folder_path_to_files_needing_metadata));
-fs.readdirSync(folder_path_to_files_needing_metadata).forEach((file) => {
-  // Check if the file is an .mp4 file
-  if (file.endsWith('.mp4')) {
-    const filename = file;
-    // console.log(filename);
-    runFFmpegCommand(filename);
-    // handbrake(filename);
-  }
+let files = fs.readdirSync(folder_path_to_files_needing_metadata);
+// console.log(files);
+const mp4Files = files.filter((filename) => {
+  return filename.endsWith('.mp4');
+});
+// console.log(mp4Files);
+
+mp4Files.forEach((filename, index) => {
+  runFFmpegCommand(filename, index + 1);
 });
