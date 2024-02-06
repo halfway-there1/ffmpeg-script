@@ -2,8 +2,9 @@ import readline from 'readline/promises';
 import chalk from 'chalk';
 import fs from 'node:fs/promises';
 import initial_setup from './ffmpeg_compression/initial_setup.js';
+import ffmpeg_compression from './ffmpeg_compression/ffmpeg_compression.js';
 
-// K:\Mobile photos and videos management\realme-6\realme-only-handbrake\experimenting
+// D:\realme6\experimenting
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -21,6 +22,7 @@ try {
     chalk.green('Great! the path you provided exists now sit and relax')
   );
   initial_setup(rootFolderPath);
+  await ffmpeg_compression(rootFolderPath);
 } catch (error) {
   console.error(
     chalk.red('The path does not exist or you do not have access.')
